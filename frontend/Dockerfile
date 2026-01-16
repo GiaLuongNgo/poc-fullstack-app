@@ -1,5 +1,5 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Build stage - use full node image for build
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY . .
 # Build Next.js application
 RUN npm run build
 
-# Production stage
+# Production stage - use alpine for smaller image
 FROM node:20-alpine
 
 WORKDIR /app
