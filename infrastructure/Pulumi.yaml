@@ -1,0 +1,14 @@
+name: poc-fullstack-app
+runtime: nodejs
+description: Infrastructure for POC Full-Stack Application using Pulumi
+
+config:
+  aws:region:
+    description: AWS region to deploy to
+    default: us-east-1
+  poc-fullstack-app:dbPassword:
+    description: Password for the RDS PostgreSQL database
+    secret: true
+  poc-fullstack-app:dbUsername:
+    description: Username for the RDS PostgreSQL database
+    default: pocuser
