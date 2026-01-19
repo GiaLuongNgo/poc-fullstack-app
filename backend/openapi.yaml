@@ -1,0 +1,292 @@
+openapi: 3.0.0
+info:
+  title: POC Full-Stack Application API
+  version: 1.0.0
+  description: REST API for managing items in the POC application
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3001
+    description: Local development server
+  - url: http://localhost:3001/api
+    description: Local development API
+
+paths:
+  /api/health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the API
+      tags:
+        - Health
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  service:
+                    type: string
+                    example: poc-backend
+
+  /api/items:
+    get:
+      summary: Get all items
+      description: Retrieves a list of all items
+      tags:
+        - Items
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new item
+      description: Creates a new item
+      tags:
+        - Items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItemInput'
+            example:
+              title: "Sample Item"
+              description: "This is a sample item description"
+              completed: false
+      responses:
+        '201':
+          description: Item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Bad request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/items/{id}:
+    get:
+      summary: Get item by ID
+      description: Retrieves a specific item by its ID
+      tags:
+        - Items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update item
+      description: Updates an existing item
+      tags:
+        - Items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the item
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateItemInput'
+            example:
+              title: "Updated Item"
+              description: "Updated description"
+              completed: true
+      responses:
+        '200':
+          description: Item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Bad request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete item
+      description: Deletes an item by its ID
+      tags:
+        - Items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID of the item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Item deleted successfully
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the item
+        title:
+          type: string
+          description: Title of the item
+        description:
+          type: string
+          description: Detailed description of the item
+        completed:
+          type: boolean
+          description: Completion status
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the item was created
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when the item was last updated
+      required:
+        - id
+        - title
+        - description
+        - completed
+        - created_at
+        - updated_at
+      example:
+        id: "123e4567-e89b-12d3-a456-426614174000"
+        title: "Sample Item"
+        description: "This is a sample item description"
+        completed: false
+        created_at: "2024-01-15T10:30:00Z"
+        updated_at: "2024-01-15T10:30:00Z"
+
+    CreateItemInput:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the item
+          minLength: 1
+        description:
+          type: string
+          description: Detailed description of the item
+        completed:
+          type: boolean
+          description: Completion status (defaults to false)
+          default: false
+      required:
+        - title
+        - description
+
+    UpdateItemInput:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the item
+          minLength: 1
+        description:
+          type: string
+          description: Detailed description of the item
+        completed:
+          type: boolean
+          description: Completion status
+      minProperties: 1
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+        - error
+      example:
+        error: "Item not found"
