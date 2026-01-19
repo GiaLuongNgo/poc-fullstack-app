@@ -34,7 +34,6 @@ RUN npm ci --only=production && \
 # Copy built application from builder
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
 
 # Change ownership to nextjs user
 RUN chown -R nextjs:nodejs /app
